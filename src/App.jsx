@@ -1,29 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import "./App.css";
 
 export default function App() {
-  const [health, setHealth] = useState("Checking...");
-  const [villages, setVillages] = useState([]);
-  const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetch("http://localhost:3000/health")
-      .then((res) => res.json())
-      .then((data) => {
-        setHealth(data.message);
-      })
-      .catch(() => {
-        setHealth("Backend not connected");
-      });
-  }, []);
+  const [search, setSearch] = useState("");
+  const [villages, setVillages] = useState([]);
 
   const searchVillages = async () => {
+
     try {
+
       const response = await fetch(
         `http://localhost:3000/autocomplete?search=${search}`
       );
 
       const data = await response.json();
+
+      console.log(data);
+
       setVillages(data);
+
     } catch (error) {
       console.log(error);
     }
@@ -32,62 +28,37 @@ export default function App() {
   return (
     <div
       style={{
+        backgroundColor: "#071739",
         minHeight: "100vh",
-        backgroundColor: "#0f172a",
-        color: "white",
         padding: "40px",
+        color: "white",
         fontFamily: "Arial",
       }}
     >
+
       <h1
         style={{
           textAlign: "center",
-          fontSize: "50px",
-          marginBottom: "10px",
+          fontSize: "60px",
+          marginBottom: "40px",
         }}
       >
         India Village API Dashboard
       </h1>
 
-      <p
-        style={{
-          textAlign: "center",
-          color: "#94a3b8",
-          marginBottom: "40px",
-        }}
-      >
-        Professional frontend dashboard for your API project
-      </p>
-
       <div
         style={{
-          backgroundColor: "#1e293b",
-          padding: "20px",
-          borderRadius: "12px",
-          marginBottom: "30px",
+          backgroundColor: "#1b2a49",
+          padding: "30px",
+          borderRadius: "20px",
+          maxWidth: "1000px",
+          margin: "auto",
         }}
       >
-        <h2>Backend Status</h2>
 
-        <p
-          style={{
-            color: "#22c55e",
-            fontWeight: "bold",
-          }}
-        >
-          {health}
-        </p>
-      </div>
-
-      <div
-        style={{
-          backgroundColor: "#1e293b",
-          padding: "20px",
-          borderRadius: "12px",
-          marginBottom: "30px",
-        }}
-      >
-        <h2>Search Villages</h2>
+        <h2 style={{ textAlign: "center" }}>
+          Search Villages
+        </h2>
 
         <div
           style={{
@@ -96,15 +67,16 @@ export default function App() {
             marginTop: "20px",
           }}
         >
+
           <input
             type="text"
-            placeholder="Enter village name..."
+            placeholder="Search villages..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
               flex: 1,
-              padding: "12px",
-              borderRadius: "8px",
+              padding: "15px",
+              borderRadius: "10px",
               border: "none",
               fontSize: "16px",
             }}
@@ -113,53 +85,73 @@ export default function App() {
           <button
             onClick={searchVillages}
             style={{
-              backgroundColor: "#3b82f6",
+              backgroundColor: "#2563eb",
               color: "white",
               border: "none",
-              padding: "12px 20px",
-              borderRadius: "8px",
+              padding: "15px 25px",
+              borderRadius: "10px",
               cursor: "pointer",
-              fontWeight: "bold",
+              fontSize: "16px",
             }}
           >
             Search
           </button>
+
         </div>
       </div>
 
       <div
         style={{
-          backgroundColor: "#1e293b",
-          padding: "20px",
-          borderRadius: "12px",
+          backgroundColor: "#1b2a49",
+          padding: "30px",
+          borderRadius: "20px",
+          maxWidth: "1000px",
+          margin: "30px auto",
         }}
       >
-        <h2>Search Results</h2>
+
+        <h2 style={{ textAlign: "center" }}>
+          Search Results
+        </h2>
 
         {villages.length === 0 ? (
-          <p style={{ color: "#94a3b8" }}>No villages found</p>
+          <p style={{ textAlign: "center" }}>
+            No villages found
+          </p>
         ) : (
           villages.map((village, index) => (
+
             <div
               key={index}
               style={{
                 backgroundColor: "#334155",
                 padding: "15px",
                 borderRadius: "10px",
-                marginTop: "15px",
+                marginTop: "10px",
               }}
             >
+
               <h3>{village.area_name}</h3>
 
-              <p>State: {village.state_name}</p>
+              <p>
+                State: {village.state_name}
+              </p>
 
-              <p>District: {village.district_name}</p>
+              <p>
+                District: {village.district_name}
+              </p>
 
-              <p>Subdistrict: {village.sub_district_name}</p>
+              <p>
+                Subdistrict: {village.sub_district_name}
+              </p>
+
             </div>
+
           ))
         )}
+
       </div>
+
     </div>
   );
 }
