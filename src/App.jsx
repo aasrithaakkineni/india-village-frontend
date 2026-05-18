@@ -1,157 +1,133 @@
-import { useState } from "react";
-import "./App.css";
+import { useEffect, useState } from "react";
 
-export default function App() {
-
-  const [search, setSearch] = useState("");
+function App() {
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
   const [villages, setVillages] = useState([]);
 
-  const searchVillages = async () => {
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [searchText, setSearchText] = useState("");
 
+  // Load States
+  useEffect(() => {
+    fetch("http://localhost:3000/states")
+      .then((res) => res.json())
+      .then((data) => setStates(data))
+      .catch((err) => console.log(err));
+  }, []);
+
+  // Load Districts
+  useEffect(() => {
+    if (selectedState !== "") {
+      fetch(
+        `http://localhost:3000/districts?state=${selectedState}`
+      )
+        .then((res) => res.json())
+        .then((data) => setDistricts(data))
+        .catch((err) => console.log(err));
+    }
+  }, [selectedState]);
+
+  // Search Villages
+  const handleSearch = async () => {
     try {
-
       const response = await fetch(
-        `http://localhost:3000/autocomplete?search=${search}`
+        `http://localhost:3000/search?query=${searchText}&state=${selectedState}`
       );
 
       const data = await response.json();
 
-      console.log(data);
-
       setVillages(data);
-
     } catch (error) {
       console.log(error);
     }
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#071739",
-        minHeight: "100vh",
-        padding: "40px",
-        color: "white",
-        fontFamily: "Arial",
-      }}
-    >
+    <div className="min-h-screen bg-[#04195c] flex items-center justify-center p-6">
+      <div className="bg-[#1e325f] p-10 rounded-3xl w-full max-w-4xl shadow-2xl">
 
-      <h1
-        style={{
-          textAlign: "center",
-          fontSize: "60px",
-          marginBottom: "40px",
-        }}
-      >
-        India Village API Dashboard
-      </h1>
+        <h1 className="text-6xl font-bold text-white text-center mb-10">
+          India Village Search
+        </h1>
 
-      <div
-        style={{
-          backgroundColor: "#1b2a49",
-          padding: "30px",
-          borderRadius: "20px",
-          maxWidth: "1000px",
-          margin: "auto",
-        }}
-      >
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Search villages..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="w-full p-4 rounded-xl bg-[#3b3b3b] text-white outline-none text-lg mb-5"
+        />
 
-        <h2 style={{ textAlign: "center" }}>
-          Search Villages
-        </h2>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginTop: "20px",
-          }}
+        {/* State Dropdown */}
+        <select
+          value={selectedState}
+          onChange={(e) => setSelectedState(e.target.value)}
+          className="w-full p-4 rounded-xl bg-[#3b3b3b] text-white outline-none text-lg mb-5"
         >
+          <option value="">All States</option>
 
-          <input
-            type="text"
-            placeholder="Search villages..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              flex: 1,
-              padding: "15px",
-              borderRadius: "10px",
-              border: "none",
-              fontSize: "16px",
-            }}
-          />
+          {states.map((state, index) => (
+            <option key={index} value={state.state_name}>
+              {state.state_name}
+            </option>
+          ))}
+        </select>
 
-          <button
-            onClick={searchVillages}
-            style={{
-              backgroundColor: "#2563eb",
-              color: "white",
-              border: "none",
-              padding: "15px 25px",
-              borderRadius: "10px",
-              cursor: "pointer",
-              fontSize: "16px",
-            }}
-          >
-            Search
-          </button>
+        {/* District Dropdown */}
+        <select
+          value={selectedDistrict}
+          onChange={(e) => setSelectedDistrict(e.target.value)}
+          className="w-full p-4 rounded-xl bg-[#3b3b3b] text-white outline-none text-lg mb-5"
+        >
+          <option value="">All Districts</option>
 
-        </div>
-      </div>
+          {districts.map((district, index) => (
+            <option key={index} value={district.district_name}>
+              {district.district_name}
+            </option>
+          ))}
+        </select>
 
-      <div
-        style={{
-          backgroundColor: "#1b2a49",
-          padding: "30px",
-          borderRadius: "20px",
-          maxWidth: "1000px",
-          margin: "30px auto",
-        }}
-      >
+        {/* Search Button */}
+        <button
+          onClick={handleSearch}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg p-4 rounded-xl transition"
+        >
+          Search
+        </button>
 
-        <h2 style={{ textAlign: "center" }}>
-          Search Results
-        </h2>
-
-        {villages.length === 0 ? (
-          <p style={{ textAlign: "center" }}>
-            No villages found
-          </p>
-        ) : (
-          villages.map((village, index) => (
-
+        {/* Results */}
+        <div className="mt-8">
+          {villages.map((village, index) => (
             <div
               key={index}
-              style={{
-                backgroundColor: "#334155",
-                padding: "15px",
-                borderRadius: "10px",
-                marginTop: "10px",
-              }}
+              className="bg-[#31497d] p-5 rounded-xl text-white mb-4"
             >
-
-              <h3>{village.area_name}</h3>
-
               <p>
-                State: {village.state_name}
+                <strong>State:</strong> {village.state_name}
               </p>
 
               <p>
-                District: {village.district_name}
+                <strong>District:</strong> {village.district_name}
               </p>
 
               <p>
-                Subdistrict: {village.sub_district_name}
+                <strong>Sub District:</strong> {village.sub_district_name}
               </p>
 
+              <p>
+                <strong>Village:</strong> {village.area_name}
+              </p>
             </div>
-
-          ))
-        )}
+          ))}
+        </div>
 
       </div>
-
     </div>
   );
 }
+
+export default App;
